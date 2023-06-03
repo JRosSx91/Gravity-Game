@@ -123,3 +123,17 @@ fn gravity(star: &Star, particle: &mut Particle) {
     particle.speed_x += force_x / particle.mass;
     particle.speed_y += force_y / particle.mass;
 }
+fn update_particles(star: &mut Star, particles: &mut Vec<Particle>) {
+    for particle in particles.iter_mut() {
+        gravity(star, particle);
+        particle.x += particle.speed_x;
+        particle.y += particle.speed_y;
+        let dx = star.x - particle.x;
+        let dy = star.y - particle.y;
+        let distance = (dx.powi(2) + dy.powi(2)).sqrt();
+        if distance < star.size / 2.0 {
+            star.mass += particle.mass;
+            *particle = new_particle();
+        }
+    }
+}
