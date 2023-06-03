@@ -137,3 +137,26 @@ fn update_particles(star: &mut Star, particles: &mut Vec<Particle>) {
         }
     }
 }
+fn new_particle() -> Particle {
+    let particle_type = if rand::random::<f64>() < 0.75 {
+        ParticleType::Hydrogen
+    } else {
+        ParticleType::Helium
+    };
+    let color = match particle_type {
+        ParticleType::Hydrogen => [0.0, 1.0, 0.0, 1.0], // Verde para el hidrógeno
+        ParticleType::Helium => [0.0, 0.0, 1.0, 1.0],   // Azul para el helio
+    };
+    Particle {
+        x: rand::random::<f64>() * 800.0,
+        y: rand::random::<f64>() * 800.0,
+        speed_x: rand::random::<f64>() - 0.5,
+        speed_y: rand::random::<f64>() - 0.5,
+        mass: match particle_type {
+            ParticleType::Hydrogen => 1.0,
+            ParticleType::Helium => 4.0,
+        },
+        particle_type,
+        color,
+    }
+}
