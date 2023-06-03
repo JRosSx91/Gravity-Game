@@ -33,5 +33,13 @@ fn main() {
                 size: 1.0,
             });
         }
+        for particle in &mut particles {
+            let dx = star.x - particle.x;
+            let dy = star.y - particle.y;
+            let dist2 = dx * dx + dy * dy;
+            let force = 0.1 * star.size / (1.0 + dist2);
+            particle.vx += force * dx;
+            particle.vy += force * dy;
+        }
     }
 }
