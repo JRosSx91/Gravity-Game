@@ -45,5 +45,13 @@ fn main() {
             particle.x += particle.vx;
             particle.y += particle.vy;
         }
+        particles.retain(|particle| {
+            if (star.x - particle.x).powi(2) + (star.y - particle.y).powi(2) < star.size.powi(2) {
+                star.size += particle.size;
+                false
+            } else {
+                true
+            }
+        });
     }
 }
