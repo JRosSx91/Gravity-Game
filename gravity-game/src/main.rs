@@ -1,5 +1,5 @@
 use piston_window::*;
-use rand::random;
+use rand::*;
 
 struct Particle {
     x: f64,
@@ -9,7 +9,7 @@ struct Particle {
     size: f64,
 }
 fn main() {
-    let mut window: PistonWindow = WindowSettings::new("Star Formation", [640, 480])
+    let mut window: PistonWindow = WindowSettings::new("Star Formation", [1248, 1024])
         .exit_on_esc(true)
         .build()
         .unwrap();
@@ -73,7 +73,7 @@ fn main() {
             // Draw the particles
             for particle in &particles {
                 ellipse(
-                    [1.0, 1.0, 1.0, 1.0],
+                    [0.0, 0.0, 0.0, 1.0],
                     [
                         particle.x - particle.size,
                         particle.y - particle.size,
