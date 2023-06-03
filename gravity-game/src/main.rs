@@ -41,5 +41,9 @@ fn main() {
             particle.vx += force * dx;
             particle.vy += force * dy;
         }
+        for particle in &mut particles {
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+        }
     }
 }
