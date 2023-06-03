@@ -1,4 +1,5 @@
 use piston_window::*;
+use rand::random;
 
 struct Particle {
     x: f64,
