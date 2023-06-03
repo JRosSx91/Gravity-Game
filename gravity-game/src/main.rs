@@ -1,10 +1,12 @@
 use piston_window::*;
-use rand::*;
+use rand::random;
 
+#[derive(Clone)]
 enum ParticleType {
     Hydrogen,
     Helium,
 }
+#[derive(Clone)]
 struct Particle {
     x: f64,
     y: f64,
@@ -15,7 +17,7 @@ struct Particle {
     color: [f32; 4],
 }
 
-const G: f64 = 6.67430e-11;
+const G: f64 = 1.0;
 
 fn main() {
     let mut window: PistonWindow = WindowSettings::new("Star Formation", [1248, 1024])
@@ -23,41 +25,9 @@ fn main() {
         .build()
         .unwrap();
 
-    let mut star = Particle {
-        x: 320.0,
-        y: 240.0,
-        speed_x: 0.0,
-        speed_y: 0.0,
-        mass: 10.0,
-        particle_type: ParticleType::Hydrogen,
-        color: [1.0, 1.0, 0.0, 1.0], // Amarillo para la estrella
-    };
+    let mut particles: Vec<Particle> = vec![new_particle(); 1000];
 
-    let mut particles: Vec<Particle> = (0..1000)
-        .map(|_| {
-            let particle_type = if rand::random::<f64>() < 0.75 {
-                ParticleType::Hydrogen
-            } else {
-                ParticleType::Helium
-            };
-            let color = match particle_type {
-                ParticleType::Hydrogen => [0.0, 1.0, 0.0, 1.0], // Verde para el hidrógeno
-                ParticleType::Helium => [0.0, 0.0, 1.0, 1.0],   // Azul para el helio
-            };
-            Particle {
-                x: rand::random::<f64>() * 800.0,
-                y: rand::random::<f64>() * 800.0,
-                speed_x: rand::random::<f64>() - 0.5,
-                speed_y: rand::random::<f64>() - 0.5,
-                mass: match particle_type {
-                    ParticleType::Hydrogen => 1.0,
-                    ParticleType::Helium => 4.0,
-                },
-                particle_type,
-                color,
-            }
-        })
-        .collect();
+    let mut star = new_star_particle();
 
     while let Some(e) = window.next() {
         if rand::random::<f64>() < 0.01 {
@@ -65,19 +35,13 @@ fn main() {
         }
 
         // Actualiza las partículas
-        star = update_particles(&mut particles);
+        star = update_particles(&mut particles, star);
 
-        // Elimina las partículas que se encuentran dentro de la estrella
-        particles.retain(|particle| {
-            let dx = star.x - particle.x;
-            let dy = star.y - particle.y;
-            let distance = (dx.powi(2) + dy.powi(2)).sqrt();
-            distance >= star.mass / 2.0
-        });
+        // Dibujar la escena
         window.draw_2d(&e, |c, g, _| {
             clear([0.0, 0.0, 0.0, 1.0], g);
 
-            // Draw the star
+            // Dibuja la estrella
             ellipse(
                 [1.0, 1.0, 0.0, 1.0],
                 [
@@ -90,7 +54,7 @@ fn main() {
                 g,
             );
 
-            // Draw the particles
+            // Dibuja las partículas
             for particle in &particles {
                 ellipse(
                     particle.color,
@@ -114,17 +78,7 @@ fn gravity(star: &Particle, particle: &mut Particle) {
     particle.speed_y += force_y / particle.mass;
 }
 
-fn update_particles(particles: &mut Vec<Particle>) -> Particle {
-    let mut star = Particle {
-        x: 320.0,
-        y: 240.0,
-        speed_x: 0.0,
-        speed_y: 0.0,
-        mass: 10.0,
-        particle_type: ParticleType::Hydrogen,
-        color: [1.0, 1.0, 0.0, 1.0],
-    };
-
+fn update_particles(particles: &mut Vec<Particle>, mut star: Particle) -> Particle {
     for particle in particles.iter_mut() {
         gravity(&star, particle);
         particle.x += particle.speed_x;
@@ -142,13 +96,13 @@ fn update_particles(particles: &mut Vec<Particle>) -> Particle {
 }
 
 fn new_particle() -> Particle {
-    let particle_type: ParticleType = if rand::random::<f64>() < 0.75 {
+    let particle_type = if rand::random::<f64>() < 0.75 {
         ParticleType::Hydrogen
     } else {
         ParticleType::Helium
     };
-    let color: [f32; 4] = match particle_type {
-        ParticleType::Hydrogen => [0.0, 1.0, 0.0, 1.0], // Verde para el hidrógeno
+    let color = match particle_type {
+        ParticleType::Hydrogen => [0.0, 1.0, 0.0, 1.0], // Verde para el hidrógen
         ParticleType::Helium => [0.0, 0.0, 1.0, 1.0],   // Azul para el helio
     };
     Particle {
@@ -162,5 +116,16 @@ fn new_particle() -> Particle {
         },
         particle_type,
         color,
+    }
+}
+fn new_star_particle() -> Particle {
+    Particle {
+        x: 320.0,
+        y: 240.0,
+        speed_x: 0.0,
+        speed_y: 0.0,
+        mass: 10.0,
+        particle_type: ParticleType::Hydrogen,
+        color: [1.0, 1.0, 0.0, 1.0], // Amarillo para la estrella
     }
 }
