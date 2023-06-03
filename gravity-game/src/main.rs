@@ -53,5 +53,36 @@ fn main() {
                 true
             }
         });
+        window.draw_2d(&e, |c, g, _| {
+            clear([1.0; 4], g);
+
+            // Draw the star
+            ellipse(
+                [1.0, 1.0, 0.0, 1.0],
+                [
+                    star.x - star.size,
+                    star.y - star.size,
+                    star.size * 2.0,
+                    star.size * 2.0,
+                ],
+                c.transform,
+                g,
+            );
+
+            // Draw the particles
+            for particle in &particles {
+                ellipse(
+                    [1.0, 1.0, 1.0, 1.0],
+                    [
+                        particle.x - particle.size,
+                        particle.y - particle.size,
+                        particle.size * 2.0,
+                        particle.size * 2.0,
+                    ],
+                    c.transform,
+                    g,
+                );
+            }
+        });
     }
 }
