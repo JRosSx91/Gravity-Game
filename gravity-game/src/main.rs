@@ -22,4 +22,16 @@ fn main() {
     };
 
     let mut particles = vec![];
+
+    while let Some(e) = window.next() {
+        if rand::random::<f64>() < 0.01 {
+            particles.push(Particle {
+                x: rand::random::<f64>() * 640.0,
+                y: rand::random::<f64>() * 480.0,
+                vx: 0.0,
+                vy: 0.0,
+                size: 1.0,
+            });
+        }
+    }
 }
