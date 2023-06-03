@@ -12,15 +12,11 @@ struct Particle {
     speed_y: f64,
     mass: f64,
     particle_type: ParticleType,
-    color: [f64; 4],
+    color: [f32; 4],
 }
-struct Star {
-    x: f64,
-    y: f64,
-    speed_x: f64,
-    speed_y: f64,
-    mass: f64,
-}
+
+const G: f64 = 6.67430e-11;
+
 fn main() {
     let mut window: PistonWindow = WindowSettings::new("Star Formation", [1248, 1024])
         .exit_on_esc(true)
@@ -30,12 +26,14 @@ fn main() {
     let mut star = Particle {
         x: 320.0,
         y: 240.0,
-        vx: 0.0,
-        vy: 0.0,
-        size: 10.0,
+        speed_x: 0.0,
+        speed_y: 0.0,
+        mass: 10.0,
+        particle_type: ParticleType::Hydrogen,
+        color: [1.0, 1.0, 0.0, 1.0], // Amarillo para la estrella
     };
 
-    let mut particles = (0..1000)
+    let mut particles: Vec<Particle> = (0..1000)
         .map(|_| {
             let particle_type = if rand::random::<f64>() < 0.75 {
                 ParticleType::Hydrogen
@@ -63,33 +61,18 @@ fn main() {
 
     while let Some(e) = window.next() {
         if rand::random::<f64>() < 0.01 {
-            particles.push(Particle {
-                x: rand::random::<f64>() * 640.0,
-                y: rand::random::<f64>() * 480.0,
-                vx: 0.0,
-                vy: 0.0,
-                size: 1.0,
-            });
+            particles.push(new_particle());
         }
-        for particle in &mut particles {
+
+        // Actualiza las partículas
+        star = update_particles(&mut particles);
+
+        // Elimina las partículas que se encuentran dentro de la estrella
+        particles.retain(|particle| {
             let dx = star.x - particle.x;
             let dy = star.y - particle.y;
-            let dist2 = dx * dx + dy * dy;
-            let force = 0.1 * star.size / (1.0 + dist2);
-            particle.vx += force * dx;
-            particle.vy += force * dy;
-        }
-        for particle in &mut particles {
-            particle.x += particle.vx;
-            particle.y += particle.vy;
-        }
-        particles.retain(|particle| {
-            if (star.x - particle.x).powi(2) + (star.y - particle.y).powi(2) < star.size.powi(2) {
-                star.size += particle.size;
-                false
-            } else {
-                true
-            }
+            let distance = (dx.powi(2) + dy.powi(2)).sqrt();
+            distance >= star.mass / 2.0
         });
         window.draw_2d(&e, |c, g, _| {
             clear([0.0, 0.0, 0.0, 1.0], g);
@@ -98,10 +81,10 @@ fn main() {
             ellipse(
                 [1.0, 1.0, 0.0, 1.0],
                 [
-                    star.x - star.size,
-                    star.y - star.size,
-                    star.size * 2.0,
-                    star.size * 2.0,
+                    star.x - star.mass,
+                    star.y - star.mass,
+                    star.mass * 2.0,
+                    star.mass * 2.0,
                 ],
                 c.transform,
                 g,
@@ -119,7 +102,7 @@ fn main() {
         });
     }
 }
-fn gravity(star: &Star, particle: &mut Particle) {
+fn gravity(star: &Particle, particle: &mut Particle) {
     let dx = star.x - particle.x;
     let dy = star.y - particle.y;
     let distance = (dx.powi(2) + dy.powi(2)).sqrt();
@@ -130,27 +113,41 @@ fn gravity(star: &Star, particle: &mut Particle) {
     particle.speed_x += force_x / particle.mass;
     particle.speed_y += force_y / particle.mass;
 }
-fn update_particles(star: &mut Star, particles: &mut Vec<Particle>) {
+
+fn update_particles(particles: &mut Vec<Particle>) -> Particle {
+    let mut star = Particle {
+        x: 320.0,
+        y: 240.0,
+        speed_x: 0.0,
+        speed_y: 0.0,
+        mass: 10.0,
+        particle_type: ParticleType::Hydrogen,
+        color: [1.0, 1.0, 0.0, 1.0],
+    };
+
     for particle in particles.iter_mut() {
-        gravity(star, particle);
+        gravity(&star, particle);
         particle.x += particle.speed_x;
         particle.y += particle.speed_y;
         let dx = star.x - particle.x;
         let dy = star.y - particle.y;
         let distance = (dx.powi(2) + dy.powi(2)).sqrt();
-        if distance < star.size / 2.0 {
+        if distance < star.mass / 2.0 {
             star.mass += particle.mass;
             *particle = new_particle();
         }
     }
+
+    star
 }
+
 fn new_particle() -> Particle {
-    let particle_type = if rand::random::<f64>() < 0.75 {
+    let particle_type: ParticleType = if rand::random::<f64>() < 0.75 {
         ParticleType::Hydrogen
     } else {
         ParticleType::Helium
     };
-    let color = match particle_type {
+    let color: [f32; 4] = match particle_type {
         ParticleType::Hydrogen => [0.0, 1.0, 0.0, 1.0], // Verde para el hidrógeno
         ParticleType::Helium => [0.0, 0.0, 1.0, 1.0],   // Azul para el helio
     };
