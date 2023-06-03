@@ -28,7 +28,31 @@ fn main() {
         size: 10.0,
     };
 
-    let mut particles = vec![];
+    let mut particles = (0..1000)
+        .map(|_| {
+            let particle_type = if rand::random::<f64>() < 0.75 {
+                ParticleType::Hydrogen
+            } else {
+                ParticleType::Helium
+            };
+            let color = match particle_type {
+                ParticleType::Hydrogen => [0.0, 1.0, 0.0, 1.0], // Verde para el hidrógeno
+                ParticleType::Helium => [0.0, 0.0, 1.0, 1.0],   // Azul para el helio
+            };
+            Particle {
+                x: rand::random::<f64>() * 800.0,
+                y: rand::random::<f64>() * 800.0,
+                speed_x: rand::random::<f64>() - 0.5,
+                speed_y: rand::random::<f64>() - 0.5,
+                mass: match particle_type {
+                    ParticleType::Hydrogen => 1.0,
+                    ParticleType::Helium => 4.0,
+                },
+                particle_type,
+                color,
+            }
+        })
+        .collect();
 
     while let Some(e) = window.next() {
         if rand::random::<f64>() < 0.01 {
@@ -79,17 +103,23 @@ fn main() {
             // Draw the particles
             for particle in &particles {
                 ellipse(
-                    [0.0, 0.0, 0.0, 1.0],
-                    [
-                        particle.x - particle.size,
-                        particle.y - particle.size,
-                        particle.size * 2.0,
-                        particle.size * 2.0,
-                    ],
+                    particle.color,
+                    [particle.x, particle.y, particle.mass, particle.mass],
                     c.transform,
                     g,
                 );
             }
         });
     }
+}
+fn gravity(star: &Star, particle: &mut Particle) {
+    let dx = star.x - particle.x;
+    let dy = star.y - particle.y;
+    let distance = (dx.powi(2) + dy.powi(2)).sqrt();
+    let force = G * star.mass * particle.mass / distance.powi(2);
+    let force_x = force * dx / distance;
+    let force_y = force * dy / distance;
+
+    particle.speed_x += force_x / particle.mass;
+    particle.speed_y += force_y / particle.mass;
 }
