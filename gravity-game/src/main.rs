@@ -1,12 +1,18 @@
 use piston_window::*;
 use rand::*;
 
+enum ParticleType {
+    Hydrogen,
+    Helium,
+}
 struct Particle {
     x: f64,
     y: f64,
-    vx: f64,
-    vy: f64,
-    size: f64,
+    speed_x: f64,
+    speed_y: f64,
+    mass: f64,
+    particle_type: ParticleType,
+    color: [f64; 4],
 }
 fn main() {
     let mut window: PistonWindow = WindowSettings::new("Star Formation", [1248, 1024])
@@ -55,7 +61,7 @@ fn main() {
             }
         });
         window.draw_2d(&e, |c, g, _| {
-            clear([1.0; 4], g);
+            clear([0.0, 0.0, 0.0, 1.0], g);
 
             // Draw the star
             ellipse(
