@@ -8,5 +8,8 @@ struct Particle {
     size: f64,
 }
 fn main() {
-    println!("Hello, world!");
+    let mut window: PistonWindow = WindowSettings::new("Star Formation", [640, 480])
+        .exit_on_esc(true)
+        .build()
+        .unwrap();
 }
