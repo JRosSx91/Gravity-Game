@@ -14,6 +14,13 @@ struct Particle {
     particle_type: ParticleType,
     color: [f64; 4],
 }
+struct Star {
+    x: f64,
+    y: f64,
+    speed_x: f64,
+    speed_y: f64,
+    mass: f64,
+}
 fn main() {
     let mut window: PistonWindow = WindowSettings::new("Star Formation", [1248, 1024])
         .exit_on_esc(true)
